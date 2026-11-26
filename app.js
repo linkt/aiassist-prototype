@@ -30,8 +30,9 @@ var ICON={
  doc:'<path d="M6.5 3h8l4 4v14h-12z"/><path d="M14.5 3v4h4M9 12h6M9 15.5h6"/>',
  moon:'<path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"/>',
  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
- chat:'<path d="M4 5h16v11H9l-5 4z"/>'};
-function ic(n){return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+ICON[n]+'</svg>'}
+ chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+ shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'};
+function ic(n,col){return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"'+(col?' style="color:'+col+'"':'')+'>'+ICON[n]+'</svg>'}
 function pending(f){return Object.keys(S.cards).filter(function(k){var c=S.cards[k];return c.state==='pending'&&(!f||f(c))}).length}
 function tierOf(id){var p=S.perm[id],r='只读';['write','del','send','exec'].forEach(function(k){if(p[k]==='自动')r='自动';else if(p[k]==='需审批'&&r!=='自动')r='需审批'});return r}
 function applyTheme(){document.documentElement.setAttribute('data-theme',S.theme)}
@@ -40,7 +41,8 @@ function applyTheme(){document.documentElement.setAttribute('data-theme',S.theme
 function newCard(o){var c={id:'c'+(S.seq++),state:'pending',created:'今天 '+new Date().toTimeString().slice(0,5)};for(var k in o)c[k]=o[k];S.cards[c.id]=c;return c.id}
 var STATE={pending:['待审批','t-pending'],approved:['已批准','t-ok'],rejected:['已拒绝','t-rej'],expired:['已过期','t-grey'],other:['已在别的设备处理','t-grey']};
 function cardHTML(id){var c=S.cards[id],a=A(c.who)||ASSIST[0],st=STATE[c.state],grey=(c.state==='expired'||c.state==='other');
- var h='<div class="card'+(grey?' grey':'')+'" style="--c:'+a.color+'" data-card="'+id+'"><h4><span>'+(c.danger?'⚠️ ':'')+'需要审批 · '+esc(c.op)+' <span class="sub">'+esc(a.name)+'</span></span><span class="tag '+st[1]+'">'+st[0]+'</span></h4>';
+ var sc=c.danger?'var(--danger)':(c.state==='pending'?a.color:'var(--text2)');
+ var h='<div class="card'+(grey?' grey':'')+'" style="--c:'+a.color+'" data-card="'+id+'"><h4><span>'+ic('shield',sc)+'需要审批 · '+esc(c.op)+' <span class="sub">'+esc(a.name)+'</span></span><span class="tag '+st[1]+'">'+st[0]+'</span></h4>';
  if(grey)h+='<div class="sub">'+(c.state==='expired'?'超过有效期（'+S.validity+'）已自动失效，操作未执行。':'已在「我的 MacBook Pro」上处理（批准），此处只读。')+' 卡片已收起。</div>';
  h+='<div class="body"><div class="kv">';c.params.forEach(function(p){h+='<div class="k">'+esc(p[0])+'</div><div>'+esc(p[1])+'</div>'});h+='</div>';
  if(c.danger&&c.state==='pending')h+='<div class="warn">危险操作：不可撤销。批准仅对本次生效，'+S.validity+'后过期。</div>';
